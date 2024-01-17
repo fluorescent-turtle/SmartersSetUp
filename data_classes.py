@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Map:
+class Environment:
     name_field: str
     length_field: int
     width_field: int
