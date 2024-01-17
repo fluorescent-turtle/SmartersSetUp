@@ -1,6 +1,3 @@
-import json
-
-
 # The function collects all the data from the user
 def get_data(mode):
     match mode:
@@ -10,7 +7,7 @@ def get_data(mode):
             pass
         case 'draw':
             # allows the automatic drawning (shows the dialog fragments to the user)
-            # collects the data from the dialogs
+            # collects the data from the dialogs in two different classes (environment, robot)
             pass
         case _:
             raise Exception('You have to choose either "handfree" or "draw')
