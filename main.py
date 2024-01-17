@@ -1,16 +1,14 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+# The function collects all the data from the user
+def get_data():
+    pass
 
 
-# Press the green button in the gutter to run the script.
+# The function produce a json file from the data coming from get_data()
+def produce_json():
+    pass
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    get_data()
+    produce_json()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
