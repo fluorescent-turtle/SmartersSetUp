@@ -1,6 +1,10 @@
 import json
 
 from data_classes import Environment, Robot
+from gui import Window
+
+
+#from ctypes import windll
 
 
 def from_dialogs(environment, robot):
@@ -36,4 +40,4 @@ def produce_json(robot):
 
 
 if __name__ == '__main__':
-    get_data('draw')
+    Window().mainloop()
