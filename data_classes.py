@@ -1,23 +1,23 @@
-import json
 from dataclasses import dataclass
 
 
 @dataclass
 class Environment:
     name_field: str
-    length_field: int
-    width_field: int
+    length_field: float
+    width_field: float
     num_blocked_areas: int
-    min_area_blocked: int
-    max_area_blocked: int
+    min_area_blocked: float
+    max_area_blocked: float
     num_circle_blocked: int
 
 
 @dataclass
 class Robot:
+    name_env: str
     type: str
-    speed: int
-    cutting_diameter: int
+    speed: float
+    cutting_diameter: float
     autonomy: int
     cutting_mode: str
     bounce_mode: str
