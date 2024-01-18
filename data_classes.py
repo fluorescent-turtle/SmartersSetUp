@@ -1,24 +1,21 @@
-from dataclasses import dataclass
+from pydantic import BaseModel
 
 
-@dataclass
-class Environment:
-    name_field: str
-    length_field: float
-    width_field: float
-    num_blocked_areas: int
-    min_area_blocked: float
-    max_area_blocked: float
-    num_circle_blocked: int
+class Environment(BaseModel):
+    name_field: str = 'Null name'
+    num_blocked_areas: int = 0
+    num_circle_blocked: int = 0
+    length_field: float = 0.0
+    width_field: float = 0.0
+    min_area_blocked: float = 0.0
+    max_area_blocked: float = 0.0
 
 
-@dataclass
-class Robot:
-    name_env: str
-    type: str
-    speed: float
-    cutting_diameter: float
-    autonomy: int
-    cutting_mode: str
-    bounce_mode: str
-
+class Robot(BaseModel):
+    type: str = 'Null type'
+    cutting_mode: str = 'Null cutting mode'
+    bounce_mode: str = 'Null bounce mode'
+    speed: float = 0.0
+    cutting_diameter: float = 0.0
+    autonomy: int = 0
+    environment: list = []

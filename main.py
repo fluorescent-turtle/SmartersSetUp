@@ -1,32 +1,39 @@
 import json
 
+from data_classes import Environment, Robot
+
+
+def from_dialogs(environment, robot):
+    pass
+
+
+def from_handfree(environment, robot):
+    pass
+
 
 # The function collects all the data from the user
 def get_data(mode):
-
+    environment = Environment()
+    robot = Robot()
     match mode:
         case 'handfree':
-            # allows the handfree drawning (shows the right screen)
-            # collects the data from the drawning in two different classes (environment, robot)
+            from_handfree(environment, robot)
             pass
         case 'draw':
-            # allows the automatic drawning (shows the dialog fragments to the user)
-            # collects the data from the dialogs in two different classes (environment, robot)
+            from_dialogs(environment, robot)
             pass
         case _:
             raise Exception('You have to choose either "handfree" or "draw')
 
     # lastly: creates a json file with the data collected
-    produce_json(environment, robot)
+    produce_json(robot)
 
 
 # The function produce a json file from the data coming from get_data()
-def produce_json(environment, robot):
+def produce_json(robot):
     with open("data_file", "w") as data_file:
-        json.dump(environment, data_file)
-    with open("data_file", "w") as data_file:
-        json.dump(robot, data_file)
+        json.dump(robot.model_dump(), data_file, indent=2)
 
 
 if __name__ == '__main__':
-    get_data()
+    get_data('draw')
