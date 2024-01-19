@@ -1,7 +1,7 @@
 import json
 
 from data_classes import Environment, Robot
-from gui import Window
+from gui import EnvironmentWindow
 
 
 #from ctypes import windll
@@ -40,4 +40,4 @@ def produce_json(robot):
 
 
 if __name__ == '__main__':
-    Window().mainloop()
+    EnvironmentWindow().mainloop()
