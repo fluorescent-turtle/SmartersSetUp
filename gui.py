@@ -209,8 +209,8 @@ class EnvironmentWindow(Tk):
         squares_entry.focus()
 
         # Isolated area features
-        eigth_label = ttk.Label(frame, text='Length (isolated area): ')
-        eigth_label.grid(column=0, row=8, sticky='W', **options)
+        eighth_label = ttk.Label(frame, text='Length (isolated area): ')
+        eighth_label.grid(column=0, row=8, sticky='W', **options)
 
         isolated_area_len = tk.StringVar()
         isolated_area_len_entry = ttk.Entry(frame, textvariable=isolated_area_len)
