@@ -1,43 +1,26 @@
-import json
-
-from data_classes import Environment, Robot
-from gui import EnvironmentWindow
+from gui import RobotWindow
 
 
-#from ctypes import windll
+def from_dialogs():
+    RobotWindow().mainloop()
 
 
-def from_dialogs(environment, robot):
-    pass
-
-
-def from_handfree(environment, robot):
+def from_handfree():
     pass
 
 
 # The function collects all the data from the user
 def get_data(mode):
-    environment = Environment()
-    robot = Robot()
     match mode:
         case 'handfree':
-            from_handfree(environment, robot)
+            from_handfree()
             pass
         case 'draw':
-            from_dialogs(environment, robot)
+            from_dialogs()
             pass
         case _:
             raise Exception('You have to choose either "handfree" or "draw')
 
-    # lastly: creates a json file with the data collected
-    produce_json(robot)
-
-
-# The function produce a json file from the data coming from get_data()
-def produce_json(robot):
-    with open("data_file", "w") as data_file:
-        json.dump(robot.model_dump(), data_file, indent=2)
-
 
 if __name__ == '__main__':
-    EnvironmentWindow().mainloop()
+    get_data('draw')  # todo:da dove prendo il mode per data?

@@ -1,11 +1,16 @@
+import json
 import tkinter as tk
 from tkinter import Tk, ttk
 from tkinter.ttk import Button
 
 
-def click_next():
-    exit()
+# todo: ogni valore nelle gui deve essere memorizzato nel json
 
+
+# The function produce a json file from the data coming from get_data()
+def produce_json(environment, robot):
+    with open("data_file", "w") as data_file:
+        json.dump(robot.model_dump(), data_file, indent=2)
 
 def click_done():
     exit()
@@ -107,11 +112,17 @@ class RobotWindow(Tk):
         autonomy_entry.focus()
 
         # Next button
-        next_button = Button(self, text="Next", command=click_next)
+        next_button = Button(self, text="Next", command=self.click_next)
         next_button.place(x=290, y=350)
 
         # add padding to the frame and show it
         frame.grid(padx=20, pady=20)
+
+    def click_next(self):
+        for widget in self.winfo_children():
+            widget.destroy()
+        self.destroy()
+        EnvironmentWindow()
 
 
 class EnvironmentWindow(Tk):
@@ -236,9 +247,9 @@ class EnvironmentWindow(Tk):
         shape_entry.grid(column=1, row=10, **options)
         shape_entry.focus()
 
-        # Next button
-        next_button = Button(self, text="Done", command=click_done())
-        next_button.place(x=800, y=820)
+        # Done button
+        done_button = Button(self, text="Done", command=click_done)
+        done_button.place(x=800, y=820)
 
         # add padding to the frame and show it
         frame.grid(padx=20, pady=20)

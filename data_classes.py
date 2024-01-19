@@ -18,4 +18,4 @@ class Robot(BaseModel):
     speed: float = 0.0
     cutting_diameter: float = 0.0
     autonomy: int = 0
-    environment: list = []
+    environment_name: str = 'Null environment name'
