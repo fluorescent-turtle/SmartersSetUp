@@ -49,72 +49,72 @@ class RobotWindow(Tk):
         frame_label = ttk.Label(self, text='Robot features', font=('Arial', 25))
         frame_label.grid(row=1, column=0, columnspan=3, **options)
 
-        # robot type
-        # todo: ci deve essere questo o gli altri campi e basta OPPURE se clicco qui mi fa l'autofill
-        first_label = ttk.Label(frame, text='Robot type: ')
-        first_label.grid(column=0, row=0, sticky='W', **options)
-
-        OptionList = ["450X"]
-        self.robot_type = tk.StringVar()
-        self.robot_type.set(OptionList[0])
-        robot_entry = tk.OptionMenu(frame, self.robot_type, *OptionList)
-        robot_entry.config(width=20, font=("Helvetica", 12))
-        robot_entry.grid(column=1, row=0, **options)
-        robot_entry.focus()
-
-        # label that guides the user
-        frame_label2 = ttk.Label(frame, text='OR')
-        frame_label2.grid(column=0, row=1, columnspan=3, **options)
-
         # cutting mode
         second_label = ttk.Label(frame, text='Cutting mode: ')
-        second_label.grid(column=0, row=2, sticky='W', **options)
+        second_label.grid(column=0, row=1, sticky='W', **options)
 
         OptionList = ["random", "systematic"]
         self.cutting_mode = tk.StringVar()
         self.cutting_mode.set(OptionList[0])
         cutting_mode_entry = tk.OptionMenu(frame, self.cutting_mode, *OptionList)
         cutting_mode_entry.config(width=20, font=("Helvetica", 12))
-        cutting_mode_entry.grid(column=1, row=2, **options)
+        cutting_mode_entry.grid(column=1, row=1, **options)
         cutting_mode_entry.focus()
 
         # bounce mode
         third_label = ttk.Label(frame, text='Bounce mode: ')
-        third_label.grid(column=0, row=3, sticky='W', **options)
+        third_label.grid(column=0, row=2, sticky='W', **options)
 
         OptionList = ["ping-pong", "probability distribution", "random"]
         self.bounce_mode = tk.StringVar()
         self.bounce_mode.set(OptionList[0])
         bounce_mode_entry = tk.OptionMenu(frame, self.bounce_mode, *OptionList)
         bounce_mode_entry.config(width=20, font=("Helvetica", 12))
-        bounce_mode_entry.grid(column=1, row=3, **options)
+        bounce_mode_entry.grid(column=1, row=2, **options)
         bounce_mode_entry.focus()
+
+        # robot type
+        # todo: ci deve essere questo o gli altri campi e basta OPPURE se clicco qui mi fa l'autofill
+        first_label = ttk.Label(frame, text='Robot type: ')
+        first_label.grid(column=0, row=3, sticky='W', **options)
+
+        OptionList = ["450X"]
+        self.robot_type = tk.StringVar()
+        self.robot_type.set(OptionList[0])
+        robot_entry = tk.OptionMenu(frame, self.robot_type, *OptionList)
+        robot_entry.config(width=20, font=("Helvetica", 12))
+        robot_entry.grid(column=1, row=3, **options)
+        robot_entry.focus()
+
+        # label that guides the user
+        frame_label2 = ttk.Label(frame, text='OR')
+        frame_label2.grid(column=0, row=4, columnspan=3, **options)
 
         # speed
         fourth_label = ttk.Label(frame, text='Speed (km/h): ')
-        fourth_label.grid(column=0, row=4, sticky='W', **options)
+        fourth_label.grid(column=0, row=5, sticky='W', **options)
 
         self.speed = tk.StringVar()
         speed_entry = ttk.Entry(frame, textvariable=self.speed)
-        speed_entry.grid(column=1, row=4, **options)
+        speed_entry.grid(column=1, row=5, **options)
         speed_entry.focus()
 
         # cutting diameter
         fifth_label = ttk.Label(frame, text='Cutting diameter: ')
-        fifth_label.grid(column=0, row=5, sticky='W', **options)
+        fifth_label.grid(column=0, row=6, sticky='W', **options)
 
         self.cutting_diameter = tk.StringVar()
         cutting_diameter_entry = ttk.Entry(frame, textvariable=self.cutting_diameter)
-        cutting_diameter_entry.grid(column=1, row=5, **options)
+        cutting_diameter_entry.grid(column=1, row=6, **options)
         cutting_diameter_entry.focus()
 
         # autonomy
         sixth_label = ttk.Label(frame, text='Autonomy (hours): ')
-        sixth_label.grid(column=0, row=6, sticky='W', **options)
+        sixth_label.grid(column=0, row=7, sticky='W', **options)
 
         self.autonomy: StringVar = tk.StringVar()
         autonomy_entry = ttk.Entry(frame, textvariable=self.autonomy)
-        autonomy_entry.grid(column=1, row=6, **options)
+        autonomy_entry.grid(column=1, row=7, **options)
         autonomy_entry.focus()
 
         # Next button
