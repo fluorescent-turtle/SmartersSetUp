@@ -24,8 +24,8 @@ class RobotWindow(Tk):
         # window title
         self.title("Smarters")
 
-        window_width = 400
-        window_height = 400
+        window_width = 600
+        window_height = 600
 
         # get the screen dimension
         screen_width = self.winfo_screenwidth()
@@ -40,13 +40,14 @@ class RobotWindow(Tk):
 
         # parameters entry
         frame = ttk.Frame(self)
+        frame.place(anchor='center')
 
         # field options
         options = {'padx': 8, 'pady': 8}
 
         # frame label
         frame_label = ttk.Label(self, text='Robot features', font=('Arial', 25))
-        frame_label.grid(row=1, column=0, **options)
+        frame_label.grid(row=1, column=0, columnspan=3, **options)
 
         # robot type
         # todo: ci deve essere questo o gli altri campi e basta OPPURE se clicco qui mi fa l'autofill
@@ -61,55 +62,59 @@ class RobotWindow(Tk):
         robot_entry.grid(column=1, row=0, **options)
         robot_entry.focus()
 
+        # label that guides the user
+        frame_label2 = ttk.Label(frame, text='OR')
+        frame_label2.grid(column=0, row=1, columnspan=3, **options)
+
         # cutting mode
         second_label = ttk.Label(frame, text='Cutting mode: ')
-        second_label.grid(column=0, row=1, sticky='W', **options)
+        second_label.grid(column=0, row=2, sticky='W', **options)
 
         OptionList = ["random", "systematic"]
         self.cutting_mode = tk.StringVar()
         self.cutting_mode.set(OptionList[0])
         cutting_mode_entry = tk.OptionMenu(frame, self.cutting_mode, *OptionList)
         cutting_mode_entry.config(width=20, font=("Helvetica", 12))
-        cutting_mode_entry.grid(column=1, row=1, **options)
+        cutting_mode_entry.grid(column=1, row=2, **options)
         cutting_mode_entry.focus()
 
         # bounce mode
         third_label = ttk.Label(frame, text='Bounce mode: ')
-        third_label.grid(column=0, row=2, sticky='W', **options)
+        third_label.grid(column=0, row=3, sticky='W', **options)
 
         OptionList = ["ping-pong", "probability distribution", "random"]
         self.bounce_mode = tk.StringVar()
         self.bounce_mode.set(OptionList[0])
         bounce_mode_entry = tk.OptionMenu(frame, self.bounce_mode, *OptionList)
         bounce_mode_entry.config(width=20, font=("Helvetica", 12))
-        bounce_mode_entry.grid(column=1, row=2, **options)
+        bounce_mode_entry.grid(column=1, row=3, **options)
         bounce_mode_entry.focus()
 
         # speed
         fourth_label = ttk.Label(frame, text='Speed (km/h): ')
-        fourth_label.grid(column=0, row=3, sticky='W', **options)
+        fourth_label.grid(column=0, row=4, sticky='W', **options)
 
         self.speed = tk.StringVar()
         speed_entry = ttk.Entry(frame, textvariable=self.speed)
-        speed_entry.grid(column=1, row=3, **options)
+        speed_entry.grid(column=1, row=4, **options)
         speed_entry.focus()
 
         # cutting diameter
         fifth_label = ttk.Label(frame, text='Cutting diameter: ')
-        fifth_label.grid(column=0, row=4, sticky='W', **options)
+        fifth_label.grid(column=0, row=5, sticky='W', **options)
 
         self.cutting_diameter = tk.StringVar()
         cutting_diameter_entry = ttk.Entry(frame, textvariable=self.cutting_diameter)
-        cutting_diameter_entry.grid(column=1, row=4, **options)
+        cutting_diameter_entry.grid(column=1, row=5, **options)
         cutting_diameter_entry.focus()
 
         # autonomy
         sixth_label = ttk.Label(frame, text='Autonomy (hours): ')
-        sixth_label.grid(column=0, row=5, sticky='W', **options)
+        sixth_label.grid(column=0, row=6, sticky='W', **options)
 
         self.autonomy: StringVar = tk.StringVar()
         autonomy_entry = ttk.Entry(frame, textvariable=self.autonomy)
-        autonomy_entry.grid(column=1, row=5, **options)
+        autonomy_entry.grid(column=1, row=6, **options)
         autonomy_entry.focus()
 
         # Next button
@@ -119,9 +124,11 @@ class RobotWindow(Tk):
         # add padding to the frame and show it
         frame.grid(padx=20, pady=20)
 
-
     def click_next(self):
-        produce_robot_json(Robot(type=self.robot_type.get(), cutting_mode=self.cutting_mode.get(), bounce_mode=self.bounce_mode.get(), speed=float(self.speed.get()), cutting_diameter=float(self.cutting_diameter.get()), autonomy=float(self.autonomy.get())))
+        produce_robot_json(
+            Robot(type=self.robot_type.get(), cutting_mode=self.cutting_mode.get(), bounce_mode=self.bounce_mode.get(),
+                  speed=float(self.speed.get()), cutting_diameter=float(self.cutting_diameter.get()),
+                  autonomy=float(self.autonomy.get())))
 
         for widget in self.winfo_children():
             widget.destroy()
@@ -257,6 +264,13 @@ class EnvironmentWindow(Tk):
 
         # add padding to the frame and show it
         frame.grid(padx=20, pady=20)
+
     def click_done(self):
-        produce_environment_json(Environment(num_blocked_areas=self.num_blocked_areas.get(), num_blocked_circles=self.circles.get(), num_blocked_squares=self.squares.get(), length_field=float(self.length.get()), width_field=float(self.width.get()), min_area_blocked=float(self.min_area.get()), max_area_blocked=float(self.max_area.get()), isolated_area_length=float(self.isolated_area_len.get()), isolated_area_width=float(self.isolated_area_wid.get()), isolated_area_shape=self.shape.get()))
+        produce_environment_json(
+            Environment(num_blocked_areas=self.num_blocked_areas.get(), num_blocked_circles=self.circles.get(),
+                        num_blocked_squares=self.squares.get(), length_field=float(self.length.get()),
+                        width_field=float(self.width.get()), min_area_blocked=float(self.min_area.get()),
+                        max_area_blocked=float(self.max_area.get()),
+                        isolated_area_length=float(self.isolated_area_len.get()),
+                        isolated_area_width=float(self.isolated_area_wid.get()), isolated_area_shape=self.shape.get()))
         exit()
