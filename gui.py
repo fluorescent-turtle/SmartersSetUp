@@ -203,9 +203,18 @@ class RobotWindow(Tk):
         bounce_mode_entry.grid(column=1, row=10, **options)
         bounce_mode_entry.focus()
 
+        # shear load
+        eighth_label = ttk.Label(frame, text='Shear load: ')
+        eighth_label.grid(column=0, row=11, sticky='W', **options)
+
+        self.shear_load = tk.IntVar()
+        shear_load_entry = ttk.Entry(frame, textvariable=self.shear_load)
+        shear_load_entry.grid(column=1, row=11, **options)
+        shear_load_entry.focus()
+
         # Next button
         next_button = Button(self, text="Next", command=self.click_next)
-        next_button.place(x=350, y=450)
+        next_button.place(x=450, y=500)
 
         # add padding to the frame and show it
         frame.grid(padx=20, pady=20)
@@ -216,7 +225,8 @@ class RobotWindow(Tk):
                 Robot(type="", cutting_mode=self.cutting_mode.get(),
                       bounce_mode=self.bounce_mode.get(),
                       speed=float(self.speed.get()), cutting_diameter=float(self.cutting_diameter.get()),
-                      autonomy=int(self.autonomy.get()), guide_lines=int(self.guide_lines.get())))
+                      autonomy=int(self.autonomy.get()), guide_lines=int(self.guide_lines.get()),
+                      shear_load=int(self.shear_load.get())))
         else:
             # legge il file
             with open("robots.json", 'r') as robots_file:
@@ -239,7 +249,8 @@ class RobotWindow(Tk):
                 speed=float(robot_info['speed']),
                 cutting_diameter=float(robot_info['cut diameter']),
                 autonomy=int(robot_info['autonomy']),
-                guide_lines=int(robot_info['guide lines'])
+                guide_lines=int(robot_info['guide lines']),
+                shear_load=int(self.shear_load.get())
             )
 
             # crea il file json
