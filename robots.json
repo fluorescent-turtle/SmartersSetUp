@@ -1,0 +1,34 @@
+{
+ "robots": {
+  "robot": [
+    {
+     "id": "450X",
+     "speed": "0.65",
+     "cut diameter": "0.24",
+      "autonomy": "270",
+      "guide lines": 3
+    },
+    {
+     "id": "405X",
+     "speed": "0.35",
+     "cut diameter": "0.22",
+      "autonomy": "50",
+      "guide lines": 1
+    },
+    {
+     "id": "415X",
+     "speed": "0.38",
+     "cut diameter": "0.22",
+      "autonomy": "50",
+      "guide lines": 1
+    },
+    {
+     "id": "430X",
+     "speed": "0.46",
+     "cut diameter": "0.24",
+      "autonomy": "145",
+      "guide lines": 2
+    }
+   ]
+ }
+}

@@ -21,4 +21,4 @@ class Robot(BaseModel):
     speed: float
     cutting_diameter: float
     autonomy: int
-    #environment_name: str
+    guide_lines: int
