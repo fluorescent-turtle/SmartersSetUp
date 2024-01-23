@@ -127,7 +127,12 @@ class RobotWindow(Tk):
         first_label = ttk.Label(frame, text='Robot type: ')
         first_label.grid(column=0, row=2, sticky='W', **options)
 
-        OptionList = ["", "450X", "405X", "415X", "430X"]
+        OptionList = [
+            "",
+            "450X",
+            #"405X",
+            #"415X",
+            "430X"]
         self.robot_type = tk.StringVar()
         self.robot_type.set(OptionList[0])
         robot_entry = tk.OptionMenu(frame, self.robot_type, *OptionList)
@@ -167,49 +172,49 @@ class RobotWindow(Tk):
         autonomy_entry.focus()
 
         # guide lines
-        seventh_label = ttk.Label(frame, text='Guide lines (number): ')
-        seventh_label.grid(column=0, row=7, sticky='W', **options)
+        #seventh_label = ttk.Label(frame, text='Guide lines (number): ')
+        #seventh_label.grid(column=0, row=7, sticky='W', **options)
 
-        self.guide_lines = tk.IntVar()
-        guide_lines_entry = ttk.Entry(frame, textvariable=self.guide_lines)
-        guide_lines_entry.grid(column=1, row=7, **options)
-        guide_lines_entry.focus()
+        #self.guide_lines = tk.IntVar()
+        #guide_lines_entry = ttk.Entry(frame, textvariable=self.guide_lines)
+        #guide_lines_entry.grid(column=1, row=7, **options)
+        #guide_lines_entry.focus()
 
         # separator
         sep = ttk.Separator(frame, orient='horizontal')
-        sep.grid(columnspan=3, row=8, column=0, sticky='ew', **options)
+        sep.grid(columnspan=3, row=7, column=0, sticky='ew', **options)
 
         # cutting mode
         second_label = ttk.Label(frame, text='Cutting mode: ')
-        second_label.grid(column=0, row=9, sticky='W', **options)
+        second_label.grid(column=0, row=8, sticky='W', **options)
 
         OptionList = ["random", "systematic"]
         self.cutting_mode = tk.StringVar()
         self.cutting_mode.set(OptionList[0])
         cutting_mode_entry = tk.OptionMenu(frame, self.cutting_mode, *OptionList)
         cutting_mode_entry.config(width=20, font=("Helvetica", 12))
-        cutting_mode_entry.grid(column=1, row=9, **options)
+        cutting_mode_entry.grid(column=1, row=8, **options)
         cutting_mode_entry.focus()
 
         # bounce mode
         third_label = ttk.Label(frame, text='Bounce mode: ')
-        third_label.grid(column=0, row=10, sticky='W', **options)
+        third_label.grid(column=0, row=9, sticky='W', **options)
 
         OptionList = ["ping-pong", "probability distribution", "random"]
         self.bounce_mode = tk.StringVar()
         self.bounce_mode.set(OptionList[0])
         bounce_mode_entry = tk.OptionMenu(frame, self.bounce_mode, *OptionList)
         bounce_mode_entry.config(width=20, font=("Helvetica", 12))
-        bounce_mode_entry.grid(column=1, row=10, **options)
+        bounce_mode_entry.grid(column=1, row=9, **options)
         bounce_mode_entry.focus()
 
         # shear load
         eighth_label = ttk.Label(frame, text='Shear load: ')
-        eighth_label.grid(column=0, row=11, sticky='W', **options)
+        eighth_label.grid(column=0, row=10, sticky='W', **options)
 
         self.shear_load = tk.IntVar()
         shear_load_entry = ttk.Entry(frame, textvariable=self.shear_load)
-        shear_load_entry.grid(column=1, row=11, **options)
+        shear_load_entry.grid(column=1, row=10, **options)
         shear_load_entry.focus()
 
         # Next button
@@ -225,7 +230,7 @@ class RobotWindow(Tk):
                 Robot(type="", cutting_mode=self.cutting_mode.get(),
                       bounce_mode=self.bounce_mode.get(),
                       speed=float(self.speed.get()), cutting_diameter=float(self.cutting_diameter.get()),
-                      autonomy=int(self.autonomy.get()), guide_lines=int(self.guide_lines.get()),
+                      autonomy=int(self.autonomy.get()), guide_lines=2, #guide_lines=int(self.guide_lines.get())
                       shear_load=int(self.shear_load.get())))
         else:
             # legge il file
@@ -234,12 +239,12 @@ class RobotWindow(Tk):
 
             robot_mapping = {
                 "450X": 0,
-                "405X": 1,
-                "415X": 2,
-                "430X": 3
+                #"405X": 1,
+                #"415X": 2,
+                "430X": 1
             }
 
-            robot_index = robot_mapping.get(self.robot_type.get(), 4)
+            robot_index = robot_mapping.get(self.robot_type.get(), 2)
             robot_info = robots['robots']['robot'][robot_index]
 
             robot = Robot(
@@ -249,7 +254,7 @@ class RobotWindow(Tk):
                 speed=float(robot_info['speed']),
                 cutting_diameter=float(robot_info['cut diameter']),
                 autonomy=int(robot_info['autonomy']),
-                guide_lines=int(robot_info['guide lines']),
+                #guide_lines=int(robot_info['guide lines']),
                 shear_load=int(self.shear_load.get())
             )
 
