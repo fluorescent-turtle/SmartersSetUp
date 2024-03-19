@@ -19,6 +19,7 @@ Classes:
     SimulatorWindow: Main window for the simulator application.
 """
 
+# todo: ricordati che random - ping pong coincide con un plugin
 import json
 import os
 import subprocess
