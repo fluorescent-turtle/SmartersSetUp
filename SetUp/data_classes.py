@@ -24,7 +24,6 @@ class Robot(BaseModel):
     cutting_diameter: float
     autonomy: int
     guide_lines: int = 2
-    shear_load: int
     algo: str
 
 

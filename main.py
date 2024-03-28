@@ -1,5 +1,5 @@
-from gui import RobotWindow
+from SetUp.gui import RobotWindow
 
 
-if __name__ == "__main__":
+def main():
     RobotWindow().mainloop()
