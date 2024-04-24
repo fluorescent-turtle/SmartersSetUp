@@ -19,7 +19,6 @@ Classes:
     SimulatorWindow: Main window for the simulator application.
 """
 
-# todo: ricordati che random - ping pong coincide con un plugin
 import json
 import os
 import subprocess
@@ -28,7 +27,9 @@ import tkinter as tk
 from tkinter import Tk, ttk, filedialog
 from tkinter.ttk import Button
 
-from SetUp.data_classes import Robot, Environment, Simulator
+from SetUp.data_classes import RobotConfig, EnvConfig, SimulatorConfig, ConfigEncoder
+
+python_objects = []
 
 
 def resource_path(relative_path):
@@ -40,34 +41,14 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-def produce_environment_json(environment):
-    """
-    Produce a JSON file from the data provided by an environment object.
-
-    :param environment: The environment object containing data to be dumped into JSON.
-    """
-    with open("environment_file", "w") as environment_file:
-        json.dump(environment.model_dump(), environment_file, indent=2)
-
-
-def produce_robot_json(robot):
-    """
-    Produce a JSON file from the data provided by a robot object.
-
-    :param robot: The robot object containing data to be dumped into JSON.
-    """
-    with open("robot_file", "w") as robot_file:
-        json.dump(robot.model_dump(), robot_file, indent=2)
-
-
-def produce_simulator_json(simulator):
-    """
-    Produce a JSON file from the data provided by a simulator object.
-
-    :param simulator: The simulator object containing data to be dumped into JSON.
-    """
-    with open("simulator_file", "w") as simulation_file:
-        json.dump(simulator.model_dump(), simulation_file, indent=2)
+def produce_json(data):
+    data_config = {
+        "robot": data[0],
+        "env": data[1],
+        "simulator": data[2]
+    }
+    with open("data_file", "w") as data_file:
+        json.dump(data_config, data_file, cls=ConfigEncoder, indent=2)
 
 
 def from_dialogs():
@@ -258,9 +239,10 @@ class RobotWindow(Tk):
         divider.grid(column=0, row=7, columnspan=2, sticky='ew', pady=(10, 0))
 
         # Add cutting mode entry
-        ttk.Label(frame, text="Cutting mode: ").grid(
+        ttk.Label(frame, text="Cutting mode - bounce mode: ").grid(
             column=0, row=8, sticky="W", **options
         )
+        # todo: shear load -- tenerlo come estensione futura
         self.cutting_mode = tk.StringVar()
         self.cutting_mode.set("")
         self.OptionCuttingList = [
@@ -350,15 +332,14 @@ class RobotWindow(Tk):
             cutting_mo = ""
 
         if not robot_type:
-            robot = Robot(
+            robot = RobotConfig(
                 type="",
                 cutting_mode=cutting_mo,
                 speed=float(self.speed.get()),
                 cutting_diameter=float(self.cutting_diameter.get()),
                 autonomy=int(self.autonomy.get()),
                 guide_lines=2,
-                algo=algo,
-            )
+                algo=algo)
         else:
             with open(resource_path("robots.json"), "r") as robots_file:
                 robots = json.load(robots_file)
@@ -366,7 +347,7 @@ class RobotWindow(Tk):
             robot_index = {"450X": 0, "430X": 1}.get(robot_type, 2)
             robot_info = robots["robots"]["robot"][robot_index]
 
-            robot = Robot(
+            robot = RobotConfig(
                 type=robot_type,
                 cutting_mode=cutting_mo,
                 speed=float(robot_info["speed"]),
@@ -376,7 +357,7 @@ class RobotWindow(Tk):
                 algo=algo,
             )
 
-        produce_robot_json(robot)
+        python_objects.append(robot)
 
         for widget in self.winfo_children():
             widget.destroy()
@@ -436,7 +417,7 @@ class EnvironmentWindow(Tk):
             ("Max height (blocked squares): ", tk.StringVar()),
             ("Number of circles (blocked areas): ", tk.IntVar()),
             ("Ray (blocked circles): ", tk.StringVar()),
-            ("Length (isolated area): ", tk.StringVar()),
+            ("Length (isolated area): ", tk.StringVar()), # todo: metti minimo e massimo anche qui
             ("Width (isolated area): ", tk.StringVar()),
             ("Radius (isolated area): ", tk.StringVar()),
         ]
@@ -485,10 +466,10 @@ class EnvironmentWindow(Tk):
         button.grid(row=len(entries) + 1, column=1, **options)
 
         # Done button
-        Button(self, text="Next", command=self.click_next).place(x=800, y=820)
+        Button(self, text="Next", command=self.click_next, padding=5).place(x=600, y=650)
 
         # Back button
-        Button(self, text="Back", command=self.click_back).place(x=10, y=820)
+        Button(self, text="Back", command=self.click_back).place(x=10, y=650)
 
         # add padding to the frame and show it
         frame.grid(padx=20, pady=20)
@@ -520,7 +501,7 @@ class EnvironmentWindow(Tk):
         Handle the click event for the "Next" button.
         Save the user input from entries and proceed accordingly.
         """
-        environment = Environment(
+        environment = EnvConfig(
             length=int(self.length.get()),
             width=int(self.width.get()),
             num_blocked_squares=self.blocked_squares.get(),
@@ -535,7 +516,7 @@ class EnvironmentWindow(Tk):
             isolated_area_width=int(self.isolated_width.get()),
             isolated_area_shape=self.shape.get()
         )
-        produce_environment_json(environment)
+        python_objects.append(environment)
 
         for widget in self.winfo_children():
             widget.destroy()
@@ -587,9 +568,10 @@ class SimulatorWindow(Tk):
 
         simulator_entries = []
         entries = [
-            ("Dimension of the tassel (m):", tk.DoubleVar, 0.5),
-            ("Cutting cycle time (h):", tk.IntVar, 0),
+            ("Dimension of the tassel (m):", tk.DoubleVar, 0.10), #todo: modifica in double
             ("Repetition times: ", tk.IntVar, 0),
+            ("Cutting cycles:", tk.IntVar, 0), # non e' in ore perche' si astrae il tempo di ricarica, ricorda che devi guardare che un ciclo dura quanto l'autonomia messa nella schermata iniziale
+
         ]
 
         for i, (label_text, var_factory, default_value) in enumerate(entries):
@@ -617,8 +599,9 @@ class SimulatorWindow(Tk):
         simulator_params = {}
         key_mapping = {
             "Dimension of the tassel (m):".strip(): "dim_tassel",
-            "Cutting cycle time (h):".strip(): "cycle",
             "Repetition times: ".strip(): "repetitions",
+            "Cutting cycle time (h):".strip(): "cycle",
+
         }
 
         for original_key, var in self.simulator_entries:
@@ -628,9 +611,10 @@ class SimulatorWindow(Tk):
             else:
                 simulator_params[mapped_key] = var.get()
 
-        simulator = Simulator(**simulator_params)
+        simulator = SimulatorConfig(**simulator_params)
 
-        produce_simulator_json(simulator)
-        run_second_program("smarters.py")  # todo: qui ci va il nome del plugin di default
+        python_objects.append(simulator)
+        produce_json(python_objects)
+        # run_second_program("smarters.py")  # todo: qui ci va il nome del plugin di default
 
         self.destroy()
