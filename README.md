@@ -1,6 +1,6 @@
 # Autonomous Robot Simulator
 
-This project develops a simulator for autonomous robots, primarily focused on Husqvarna Automower. The simulator allows configuring and testing various usage scenarios for these robots.
+This project provides a setup tool for configuring and initializing the Autonomous Robot Simulator. It allows users to define the simulation environment, robot parameters, and other settings before running the main simulator application.
 
 ## Main Features
 
