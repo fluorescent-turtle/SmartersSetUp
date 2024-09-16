@@ -1,75 +1,243 @@
-"""
-Main functions and classes for environment setup using dialogs.
-
-This module provides functionality to create and configure environments,
-robots, and simulators using dialog windows in a Tkinter-based GUI.
-
-Functions:
-    from_dialogs: Open the environment creation window using dialogs.
-    from_handfree: Placeholder function for future implementation of hand free environment creation.
-    produce_simulator_json: Produce a JSON file from the data provided by a simulator object.
-    produce_environment_json: Produce a JSON file from the data provided by an environment object.
-    produce_robot_json: Produce a JSON file from the data provided by a robot object.
-    run_second_program: Run the second program using subprocess.
-
-Classes:
-    ChooseWindow: Main window for choosing how to create the environment.
-    RobotWindow: Window for configuring robot features.
-    EnvironmentWindow: Window for configuring environment features.
-    SimulatorWindow: Main window for the simulator application.
-"""
 
 import json
+import math
 import os
 import subprocess
 import sys
 import tkinter as tk
-from tkinter import Tk, ttk, filedialog
+from tkinter import Tk, ttk
+from tkinter import simpledialog, filedialog, colorchooser
 from tkinter.ttk import Button
+
+import numpy as np
+from future.moves.tkinter import simpledialog, colorchooser
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from SetUp.data_classes import RobotConfig, EnvConfig, SimulatorConfig, ConfigEncoder
 
+# Global objects
 python_objects = []
+objects_data = {
+    "length": 100.0,
+    "width": 100.0,
+    "circles": [],
+    "squares": [],
+    "isolated_area": [],
+    "opening": [],
+}
 
 
 def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-
+    base_path = getattr(sys, "_MEIPASS", os.path.abspath("."))
     return os.path.join(base_path, relative_path)
 
 
 def produce_json(data):
-    data_config = {
-        "robot": data[0],
-        "env": data[1],
-        "simulator": data[2]
-    }
+    data_config = {"robot": data[0], "env": data[2], "simulator": data[1]}
     with open("data_file", "w") as data_file:
         json.dump(data_config, data_file, cls=ConfigEncoder, indent=2)
 
 
 def from_dialogs():
-    """
-    Open the environment creation window using dialogs.
-    """
+    """Open the environment creation window using dialogs."""
     EnvironmentWindow()
+
+
+def add_isolated_area():
+    shape = simpledialog.askstring("Input", "Enter the isolated area shape:")
+    d_tassel = python_objects[1].dim_tassel
+
+    if shape == "Square":
+        x, y = get_coordinates("bottom-left corner")
+        width, height = get_dimensions()
+        opening_x, opening_y = get_coordinates("openings' bottom-left corner")
+        opening_width, opening_height = get_dimensions("opening")
+
+        draw_rectangle(x, y, width, height, "black")
+        draw_rectangle(opening_x, opening_y, opening_width, opening_height, "yellow")
+
+        update_area_coordinates(x, y, width, height, d_tassel, "isolated_area")
+    else:
+        x_center, y_center, radius = get_circle_data()
+        opening_x, opening_y = get_coordinates("openings' bottom-left corner")
+        opening_width, opening_height = get_dimensions("opening")
+
+        color = colorchooser.askcolor()[1]
+        label = simpledialog.askstring("Input", "Enter the label:")
+
+        draw_circle(x_center, y_center, radius, color, label)
+        draw_rectangle(opening_x, opening_y, opening_width, opening_height, "yellow")
+
+        update_area_coordinates_for_circle(x_center, y_center, radius, d_tassel, "is_area")
+
+    update_area_coordinates(opening_x, opening_y, opening_width, opening_height, d_tassel, "opening")
+
+
+def add_square():
+    x, y = get_coordinates("bottom-left corner")
+    width, height = get_dimensions()
+    color = colorchooser.askcolor()[1]
+    label = simpledialog.askstring("Input", "Enter the label:")
+
+    draw_rectangle(x, y, width, height, color, label)
+    update_area_coordinates(x, y, width, height, python_objects[1].dim_tassel, "squares")
+
+
+def add_circle():
+    x_center, y_center, radius = get_circle_data()
+    color = colorchooser.askcolor()[1]
+    label = simpledialog.askstring("Input", "Enter the label:")
+
+    draw_circle(x_center, y_center, radius, color, label)
+    update_area_coordinates_for_circle(x_center, y_center, radius, python_objects[1].dim_tassel, "circles")
+
+
+def draw_map():
+    ax.clear()
+    width, length = objects_data["width"], objects_data["length"]
+    tile_size = python_objects[1].dim_tassel
+    x_positions = np.arange(0, width, tile_size)
+    y_positions = np.arange(0, length, tile_size)
+
+    for x in x_positions:
+        for y in y_positions:
+            ax.add_patch(plt.Rectangle((x, y), tile_size, tile_size, fill=None, edgecolor='black'))
+
+    ax.set_xlim(0, width)
+    ax.set_ylim(0, length)
+    ax.set_aspect('equal')
+    canv.draw()
+
+
+def get_grid_dimensions():
+    """Ask for grid dimensions using a simple dialog."""
+    root = tk.Tk()
+    root.withdraw()
+    objects_data["length"] = simpledialog.askfloat("Grid Size", "Enter the length of the grid:", initialvalue=100.0)
+    objects_data["width"] = simpledialog.askfloat("Grid Size", "Enter the width of the grid:", initialvalue=100.0)
+    root.destroy()
+
+
+class HandFreeWindow(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        get_grid_dimensions()
+        self.setup_map_editor()
+
+    def setup_map_editor(self):
+        """Setup the map editor window."""
+        global ax, canv
+        self.title("Map Editor")
+        fig, ax = plt.subplots(figsize=(10, 10))
+
+        top_frame, bottom_frame = tk.Frame(self), tk.Frame(self)
+        top_frame.pack(side=tk.TOP, fill=tk.X)
+        bottom_frame.pack(side=tk.BOTTOM, fill=tk.X)
+
+        canv = FigureCanvasTkAgg(fig, master=self)
+        canv.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+        self.create_buttons(top_frame, bottom_frame)
+        draw_map()
+
+    def create_buttons(self, top_frame, bottom_frame):
+        """Create all the buttons for the map editor."""
+        buttons = [
+            ("Add Circle", add_circle),
+            ("Add Square", add_square),
+            ("Add Isolated Area", add_isolated_area),
+            ("Back", self.click_back),
+            ("Done", self.click_next),
+        ]
+        for name, command in buttons[:3]:
+            tk.Button(top_frame, text=name, command=command).pack(side=tk.LEFT)
+        for name, command in buttons[3:]:
+            tk.Button(bottom_frame, text=name, command=command).pack(side=tk.RIGHT)
+
+    def click_back(self):
+        """Handle the click event for the "Back" button."""
+        self.destroy()
+        ChooseWindow()
+
+    def click_next(self):
+        """Handle the click event for the "Next" button."""
+        python_objects.append(objects_data)
+        produce_json(python_objects)
+        self.destroy()
+
+
+def get_coordinates(label="point"):
+    """Get coordinates through dialogs."""
+    x = simpledialog.askfloat("Input", f"Enter the x coordinate of the {label}:")
+    y = simpledialog.askfloat("Input", f"Enter the y coordinate of the {label}:")
+    return x, y
+
+
+def get_dimensions(label="area"):
+    """Get width and height through dialogs."""
+    width = simpledialog.askfloat("Input", f"Enter the width of the {label}:")
+    height = simpledialog.askfloat("Input", f"Enter the height of the {label}:")
+    return width, height
+
+
+def get_circle_data():
+    """Get the center coordinates and radius for a circle."""
+    x_center = simpledialog.askfloat("Input", "Enter the x coordinate of the center:")
+    y_center = simpledialog.askfloat("Input", "Enter the y coordinate of the center:")
+    radius = simpledialog.askfloat("Input", "Enter the radius:")
+    return x_center, y_center, radius
+
+
+def draw_rectangle(x, y, width, height, color, label=None):
+    """Draw a rectangle on the map."""
+    ax.add_patch(plt.Rectangle((x, y), width, height, color=color, alpha=0.5, label=label))
+    plt.draw()
+
+
+def draw_circle(x_center, y_center, radius, color, label=None):
+    """Draw a circle on the map."""
+    ax.add_patch(plt.Circle((x_center, y_center), radius, color=color, alpha=0.5, label=label))
+    plt.draw()
+
+
+def update_area_coordinates(x, y, width, height, d_tassel, area_type):
+    """Update the coordinates for a rectangular area."""
+    x, y = round(x / d_tassel), round(y / d_tassel)
+    end_x, end_y = x + round(width / d_tassel), y + round(height / d_tassel)
+    for i in range(x, end_x):
+        for j in range(y, end_y):
+            objects_data[area_type].append((i, j))
+
+
+def update_area_coordinates_for_circle(x_center, y_center, radius, d_tassel, area_type):
+    """Update the coordinates for a circular area."""
+    x_center, y_center = math.floor(x_center / d_tassel), math.floor(y_center / d_tassel)
+    radius = round(radius / d_tassel)
+
+    for i in range(int(objects_data["length"] / d_tassel)):
+        for j in range(int(objects_data["width"] / d_tassel)):
+            dist = math.hypot(i - x_center, j - y_center)
+            if dist <= radius:
+                objects_data[area_type].append((i, j))
+
 
 
 def from_handfree():
     """
-    Placeholder function for future implementation of hand free environment creation.
+    Open the HandFreeWindow.
+
     """
-    pass
+    HandFreeWindow()
 
 
 def run_second_program(path_smarters):
     """
     Run the second program using subprocess.
 
-    :param path_smarters: The path to the second program.
+    :param path_smarters: The path to the second program to run.
+    :type path_smarters: str
+    :raises FileNotFoundError: If the file at path_smarters does not exist.
     """
     # Check if the file exists
     if not os.path.exists(path_smarters):
@@ -104,7 +272,7 @@ class ChooseWindow(Tk):
         # Set window geometry
         self.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
 
-        # Parameters entry
+        # Create frame for parameters entry
         frame = ttk.Frame(self)
         frame.place(anchor="center")
 
@@ -114,9 +282,9 @@ class ChooseWindow(Tk):
         )
         frame_label.grid(row=1, column=0, columnspan=3, padx=20, pady=20)
 
-        # Buttons
+        # Create buttons for choosing environment creation method
         buttons = [
-            ("By hand drawing", self.click_handfree),
+            ("By drawings", self.click_handfree),
             ("By entries", self.click_entry),
         ]
         for i, (text, command) in enumerate(buttons, start=2):
@@ -137,11 +305,11 @@ class ChooseWindow(Tk):
         """
         Handle the click event for the "Back" button.
         """
-        self.clear_and_destroy(RobotWindow)
+        self.clear_and_destroy(SimulatorWindow)
 
     def click_handfree(self):
         """
-        Handle the click event for the "By hand drawing" button.
+        Handle the click event for the "By drawings" button.
         """
         self.clear_and_destroy(from_handfree)
 
@@ -150,6 +318,7 @@ class ChooseWindow(Tk):
         Clear the window widgets and destroy the window, then call the specified callback.
 
         :param callback: The callback function to be called after destroying the window.
+        :type callback: callable
         """
         for widget in self.winfo_children():
             widget.destroy()
@@ -168,14 +337,14 @@ class RobotWindow(Tk):
         """
         super().__init__()
 
-        # window title
+        # Window title
         self.dialog_opened = False
         self.title("SetUpSmarters")
 
         window_width = 600
         window_height = 600
 
-        # get the screen dimension and find the center point
+        # Get the screen dimensions and calculate center position
         screen_width, screen_height = (
             self.winfo_screenwidth(),
             self.winfo_screenheight(),
@@ -185,14 +354,14 @@ class RobotWindow(Tk):
             screen_height // 2 - window_height // 2,
         )
 
-        # set the position of the window to the center of the screen
+        # Set window position to the center of the screen
         self.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
 
-        # parameters entry
+        # Create frame for parameters entry
         frame = ttk.Frame(self)
         frame.place(anchor="center")
 
-        # field options
+        # Define field options
         options = {"padx": 8, "pady": 8}
 
         # Add frame label
@@ -200,11 +369,11 @@ class RobotWindow(Tk):
             row=1, column=0, columnspan=3, **options
         )
 
-        # Add robot type entry
+        # Add robot type dropdown menu
         ttk.Label(frame, text="Robot type: ").grid(
             column=0, row=2, sticky="W", **options
         )
-        OptionList = ["", "450X", "430X"]
+        OptionList = ["", "450X", "430X", "405X", "415X"]
         self.robot_type = tk.StringVar()
         self.robot_type.set(OptionList[0])
         robot_entry = tk.OptionMenu(frame, self.robot_type, *OptionList)
@@ -222,9 +391,7 @@ class RobotWindow(Tk):
             ("Autonomy (minutes): ", tk.StringVar()),
         ]
 
-        self.speed, self.cutting_diameter, self.autonomy = [
-            var for _, var in fields
-        ]
+        self.speed, self.cutting_diameter, self.autonomy = [var for _, var in fields]
 
         for i, (label_text, var) in enumerate(fields, start=4):
             ttk.Label(frame, text=label_text).grid(
@@ -235,23 +402,20 @@ class RobotWindow(Tk):
             entry.focus()
 
         # Divider
-        divider = ttk.Separator(frame, orient='horizontal')
-        divider.grid(column=0, row=7, columnspan=2, sticky='ew', pady=(10, 0))
+        divider = ttk.Separator(frame, orient="horizontal")
+        divider.grid(column=0, row=7, columnspan=2, sticky="ew", pady=(10, 0))
 
-        # Add cutting mode entry
+        # Add cutting mode dropdown menu
         ttk.Label(frame, text="Cutting mode - bounce mode: ").grid(
             column=0, row=8, sticky="W", **options
         )
-        # todo: shear load -- tenerlo come estensione futura
         self.cutting_mode = tk.StringVar()
         self.cutting_mode.set("")
         self.OptionCuttingList = [
             "",
             "random - ping-pong",
-            "random - probability distribution",
             "random - random",
             "systematic - ping-pong",
-            "systematic - probability distribution",
             "systematic - random",
             "Load your JSON file",
         ]
@@ -269,7 +433,7 @@ class RobotWindow(Tk):
         # Add Next button
         Button(self, text="Next", command=self.click_next).place(x=450, y=500)
 
-        # add padding to the frame and show it
+        # Add padding to the frame and display it
         frame.grid(padx=20, pady=20)
 
     def open_file_dialog(self):
@@ -280,7 +444,7 @@ class RobotWindow(Tk):
             self.dialog_opened = True
             file_path = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json")])
             if file_path:
-                print("File selezionato:", file_path)
+                print("Selected file:", file_path)
                 file_name = os.path.basename(file_path)
                 load_json_index = self.OptionCuttingList.index("Load your JSON file")
                 self.OptionCuttingList[load_json_index] = file_name
@@ -320,10 +484,8 @@ class RobotWindow(Tk):
             cutting_mo = ""
         elif cutting_mo in [
             "random - ping-pong",
-            "random - probability distribution",
             "random - random",
             "systematic - ping-pong",
-            "systematic - probability distribution",
             "systematic - random",
         ]:
             algo = ""
@@ -339,7 +501,8 @@ class RobotWindow(Tk):
                 cutting_diameter=float(self.cutting_diameter.get()),
                 autonomy=int(self.autonomy.get()),
                 guide_lines=2,
-                algo=algo)
+                algo=algo,
+            )
         else:
             with open(resource_path("robots.json"), "r") as robots_file:
                 robots = json.load(robots_file)
@@ -362,7 +525,7 @@ class RobotWindow(Tk):
         for widget in self.winfo_children():
             widget.destroy()
         self.destroy()
-        ChooseWindow()
+        SimulatorWindow()
 
 
 class EnvironmentWindow(Tk):
@@ -376,14 +539,14 @@ class EnvironmentWindow(Tk):
         """
         super().__init__()
 
-        # window title
+        # Set window title
         self.absolute_path = None
         self.title("SetUpSmarters")
 
-        window_width = 900
-        window_height = 900
+        window_width = 1200
+        window_height = 1200
 
-        # get the screen dimension and find the center point
+        # Get the screen dimensions and calculate center position
         screen_width, screen_height = (
             self.winfo_screenwidth(),
             self.winfo_screenheight(),
@@ -393,20 +556,21 @@ class EnvironmentWindow(Tk):
             screen_height // 2 - window_height // 2,
         )
 
-        # set the position of the window to the center of the screen
+        # Set the position of the window to the center of the screen
         self.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
 
-        # parameters entry
+        # Create a frame for parameters entry
         frame = ttk.Frame(self)
 
-        # field options
+        # Define options for field spacing
         options = {"padx": 8, "pady": 8}
 
-        # frame label
+        # Add frame label for environment features
         ttk.Label(self, text="Environment features", font=("Arial", 25)).grid(
-            row=1, column=0, **options
+            row=0, column=0, columnspan=2, **options
         )
 
+        # Define entries for environment parameters
         entries = [
             ("Length (environment): ", tk.StringVar()),
             ("Width (environment): ", tk.StringVar()),
@@ -416,10 +580,14 @@ class EnvironmentWindow(Tk):
             ("Min height (blocked squares): ", tk.StringVar()),
             ("Max height (blocked squares): ", tk.StringVar()),
             ("Number of circles (blocked areas): ", tk.IntVar()),
-            ("Ray (blocked circles): ", tk.StringVar()),
-            ("Length (isolated area): ", tk.StringVar()), # todo: metti minimo e massimo anche qui
-            ("Width (isolated area): ", tk.StringVar()),
-            ("Radius (isolated area): ", tk.StringVar()),
+            ("Min ray (blocked circles): ", tk.StringVar()),
+            ("Max ray (blocked circles): ", tk.StringVar()),
+            ("Min height (isolated area): ", tk.StringVar()),
+            ("Max height (isolated area): ", tk.StringVar()),
+            ("Min width (isolated area): ", tk.StringVar()),
+            ("Max width (isolated area): ", tk.StringVar()),
+            ("Min radius (isolated area): ", tk.StringVar()),
+            ("Max radius (isolated area): ", tk.StringVar()),
         ]
 
         (
@@ -431,47 +599,50 @@ class EnvironmentWindow(Tk):
             self.min_height,
             self.max_height,
             self.circles,
-            self.ray,
-            self.isolated_length,
-            self.isolated_width,
-            self.radius,
+            self.min_ray,
+            self.max_ray,
+            self.isolated_min_length,
+            self.isolated_max_length,
+            self.isolated_min_width,
+            self.isolated_max_width,
+            self.min_radius,
+            self.max_radius,
         ) = [var for _, var in entries]
 
-        for i, (label_text, var) in enumerate(entries, start=0):
+        # Create and place entry widgets for each parameter
+        for i, (label_text, var) in enumerate(entries, start=1):
             ttk.Label(frame, text=label_text).grid(
                 row=i, column=0, sticky="W", **options
             )
             entry = ttk.Entry(frame, textvariable=var)
             entry.grid(row=i, column=1, **options)
-            entry.focus()
 
-        # Isolated area shape
+        # Add isolated area shape option menu
         ttk.Label(frame, text="Shape (isolated area): ").grid(
-            row=len(entries), column=0, sticky="W", **options
+            row=len(entries) + 1, column=0, sticky="W", **options
         )
         option_list = ["Square", "Circle"]
         shape_var = tk.StringVar()
         shape_var.set(option_list[0])
-        option_menu = tk.OptionMenu(frame, shape_var, *option_list)
-        option_menu.config(width=20, font=("Helvetica", 12))
-        option_menu.grid(row=len(entries), column=1, **options)
-        option_menu.focus()
+        option_menu = ttk.OptionMenu(frame, shape_var, *option_list)
+        option_menu.config(width=20)
+        option_menu.grid(row=len(entries) + 1, column=1, **options)
 
-        # Extra data
+        # Add button to load extra data
         ttk.Label(frame, text="Load your data: ").grid(
-            row=len(entries) + 1, column=0, sticky="W", **options
+            row=len(entries) + 2, column=0, sticky="W", **options
         )
         button = tk.Button(frame, text="Open", command=self.button_click)
-        button.config(width=20, font=("Helvetica", 12))
-        button.grid(row=len(entries) + 1, column=1, **options)
+        button.config(width=20)
+        button.grid(row=len(entries) + 2, column=1, **options)
 
-        # Done button
-        Button(self, text="Next", command=self.click_next, padding=5).place(x=600, y=650)
+        # Add Done and Back buttons
+        Button(self, text="Done", command=self.click_next, padding=5).place(
+            x=600, y=790
+        )
+        Button(self, text="Back", command=self.click_back).place(x=10, y=790)
 
-        # Back button
-        Button(self, text="Back", command=self.click_back).place(x=10, y=650)
-
-        # add padding to the frame and show it
+        # Add padding to the frame and display it
         frame.grid(padx=20, pady=20)
 
         self.entries = dict(entries)
@@ -481,6 +652,8 @@ class EnvironmentWindow(Tk):
     def button_click(self):
         """
         Open a file dialog to select a JSON file for extra data.
+
+        :param self: The instance of the EnvironmentWindow class.
         """
         self.absolute_path = None
         file_path = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json")])
@@ -492,36 +665,44 @@ class EnvironmentWindow(Tk):
     def click_back(self):
         """
         Handle the click event for the "Back" button.
+
+        :param self: The instance of the EnvironmentWindow class.
         """
         self.destroy()
-        RobotWindow()
+        ChooseWindow()
 
     def click_next(self):
         """
-        Handle the click event for the "Next" button.
+        Handle the click event for the "Done" button.
         Save the user input from entries and proceed accordingly.
+
+        :param self: The instance of the EnvironmentWindow class.
         """
         environment = EnvConfig(
-            length=int(self.length.get()),
-            width=int(self.width.get()),
+            length=float(self.length.get()),
+            width=float(self.width.get()),
             num_blocked_squares=self.blocked_squares.get(),
-            min_width_square=int(self.min_width.get()),
-            max_width_square=int(self.max_width.get()),
-            min_height_square=int(self.min_height.get()),
-            max_height_square=int(self.max_height.get()),
+            min_width_square=float(self.min_width.get()),
+            max_width_square=float(self.max_width.get()),
+            min_height_square=float(self.min_height.get()),
+            max_height_square=float(self.max_height.get()),
             num_blocked_circles=self.circles.get(),
-            ray=int(self.ray.get()),
-            isolated_area_length=int(self.isolated_length.get()),
-            radius=int(self.radius.get()),
-            isolated_area_width=int(self.isolated_width.get()),
-            isolated_area_shape=self.shape.get()
+            min_ray=float(self.min_ray.get()),
+            max_ray=float(self.max_ray.get()),
+            isolated_area_min_length=float(self.isolated_min_length.get()),
+            isolated_area_max_length=float(self.isolated_max_length.get()),
+            min_radius=float(self.min_radius.get()),
+            max_radius=float(self.max_radius.get()),
+            isolated_area_min_width=float(self.isolated_min_width.get()),
+            isolated_area_max_width=float(self.isolated_max_width.get()),
+            isolated_area_shape=self.shape.get(),
         )
         python_objects.append(environment)
 
-        for widget in self.winfo_children():
-            widget.destroy()
+        produce_json(python_objects)
+        # run_second_program("smarters.py")  # todo: include the default plugin name here
+
         self.destroy()
-        SimulatorWindow()
 
 
 class SimulatorWindow(Tk):
@@ -535,13 +716,13 @@ class SimulatorWindow(Tk):
         """
         super().__init__()
 
-        # window title
+        # Set window title
         self.title("SetUpSmarters")
 
         window_width = 500
         window_height = 500
 
-        # get the screen dimension and find the center point
+        # Get the screen dimensions and calculate center position
         screen_width, screen_height = (
             self.winfo_screenwidth(),
             self.winfo_screenheight(),
@@ -551,29 +732,30 @@ class SimulatorWindow(Tk):
             screen_height // 2 - window_height // 2,
         )
 
-        # set the position of the window to the center of the screen
+        # Set the position of the window to the center of the screen
         self.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
 
-        # Create parameters entry frame
+        # Create a frame for parameters entry
         frame = ttk.Frame(self)
         frame.place(anchor="center")
 
-        # Define options for fields
+        # Define options for field spacing
         options = {"padx": 20, "pady": 20}
 
-        # Add frame label
+        # Add frame label for simulator features
         ttk.Label(self, text="Simulator features", font=("Arial", 18)).grid(
             row=1, column=0, columnspan=3, **options
         )
 
         simulator_entries = []
         entries = [
-            ("Dimension of the tassel (m):", tk.DoubleVar, 0.10), #todo: modifica in double
+            ("Dimension of the tassel (m):", tk.DoubleVar, 0.20),
+            ("Number of maps:", tk.IntVar, 0),
             ("Repetition times: ", tk.IntVar, 0),
-            ("Cutting cycles:", tk.IntVar, 0), # non e' in ore perche' si astrae il tempo di ricarica, ricorda che devi guardare che un ciclo dura quanto l'autonomia messa nella schermata iniziale
-
+            ("Cutting mins:", tk.IntVar, 0),
         ]
 
+        # Create and place entry widgets for each simulator parameter
         for i, (label_text, var_factory, default_value) in enumerate(entries):
             ttk.Label(frame, text=label_text).grid(
                 column=0, row=i + 2, sticky="W", **options
@@ -585,36 +767,48 @@ class SimulatorWindow(Tk):
             entry.focus()
             simulator_entries.append((label_text, var))
 
-        # Add Next button
-        tk.Button(self, text="Done", command=self.click_done).place(x=350, y=400)
+        # Add Next and Back buttons
+        tk.Button(self, text="Next", command=self.click_next).place(x=350, y=400)
+        Button(self, text="Back", command=self.click_back).place(x=50, y=400)
 
-        # Add padding to the frame and show it
+        # Add padding to the frame and display it
         frame.grid(padx=20, pady=20)
 
-        # Populate simulator_entries with tuples containing label_text and associated Tkinter Variable objects
         self.simulator_entries = simulator_entries
 
-    def click_done(self):
-        """Handle the click event for the "Done" button."""
+    def click_back(self):
+        """
+        Handle the click event for the "Back" button.
+
+        :param self: The instance of the SimulatorWindow class.
+        """
+        self.destroy()
+        RobotWindow()
+
+    def click_next(self):
+        """
+        Handle the click event for the "Next" button.
+
+        :param self: The instance of the SimulatorWindow class.
+        """
         simulator_params = {}
         key_mapping = {
             "Dimension of the tassel (m):".strip(): "dim_tassel",
+            "Number of maps:".strip(): "num_maps",
             "Repetition times: ".strip(): "repetitions",
-            "Cutting cycle time (h):".strip(): "cycle",
-
+            "Cutting mins:".strip(): "cycle",
         }
 
         for original_key, var in self.simulator_entries:
             mapped_key = key_mapping[original_key.strip()]
-            if isinstance(var, tk.DoubleVar):
-                simulator_params[mapped_key] = float(var.get())
-            else:
-                simulator_params[mapped_key] = var.get()
+            simulator_params[mapped_key] = var.get()
 
         simulator = SimulatorConfig(**simulator_params)
 
         python_objects.append(simulator)
-        produce_json(python_objects)
-        # run_second_program("smarters.py")  # todo: qui ci va il nome del plugin di default
 
+        for widget in self.winfo_children():
+            widget.destroy()
         self.destroy()
+        ChooseWindow()
+

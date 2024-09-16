@@ -3,7 +3,7 @@
   "robot": [
     {
      "id": "450X",
-     "speed": "0.65",
+     "speed": "0.62",
      "cut diameter": "0.24",
       "autonomy": "270",
       "guide lines": 2,
