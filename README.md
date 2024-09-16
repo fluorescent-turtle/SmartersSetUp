@@ -1,6 +1,6 @@
 # Autonomous Robot Simulator
 
-This project provides a setup tool for configuring and initializing the Autonomous Robot Simulator. It allows users to define the simulation environment, robot parameters, and other settings before running the main simulator application.
+This project provides a setup tool for configuring and initializing SMARTERS, an Autonomous Robot Simulator. It allows users to define the simulation environment, robot parameters, and other settings before running the main simulator application.
 
 ## Main Features
 
