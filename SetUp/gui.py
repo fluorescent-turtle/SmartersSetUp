@@ -251,14 +251,20 @@ def run_second_program(path_smarters):
 
     :param path_smarters: The path to the second program to run.
     :type path_smarters: str
-    :raises FileNotFoundError: If the file at path_smarters does not exist.
+    :raises FileNotFoundError: If the file at path_smarters does not exist or cannot be executed by python3.
     """
     # Check if the file exists
     if not os.path.exists(path_smarters):
         raise FileNotFoundError(f"The file '{path_smarters}' does not exist.")
 
-    # Run the second program
-    subprocess.Popen(["python", path_smarters])
+    # Make absolute path
+    abs_path = os.path.abspath(path_smarters)
+
+    try:
+        # Attempt to execute the file with 'python3' interpreter
+        subprocess.run([sys.executable, abs_path], check=True)
+    except Exception as e:
+        raise FileNotFoundError(f"The file '{abs_path}' could not be executed by python3: \n{str(e)}") from None
 
 
 class ChooseWindow(Tk):
@@ -714,7 +720,7 @@ class EnvironmentWindow(Tk):
         python_objects.append(environment)
 
         produce_json(python_objects)
-        # run_second_program("smarters.py")  # todo: include the default plugin name here
+        run_second_program("../smarters/main.py")
 
         self.destroy()
 
