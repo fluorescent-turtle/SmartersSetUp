@@ -1,0 +1,37 @@
+{
+  "robot": {
+    "type": "450X",
+    "cutting_mode": "random - random",
+    "speed": 0.62,
+    "cutting_diameter": 0.24,
+    "autonomy": 1000,
+    "guide_lines": 2,
+    "recharge": 60,
+    "algo": ""
+  },
+  "env": {
+    "length": 50.0,
+    "width": 70.0,
+    "num_blocked_squares": 0,
+    "min_width_square": 0.0,
+    "max_width_square": 0.0,
+    "min_height_square": 0.0,
+    "max_height_square": 0.0,
+    "num_blocked_circles": 0,
+    "min_ray": 0.0,
+    "max_ray": 0.0,
+    "isolated_area_min_length": 0.0,
+    "isolated_area_max_length": 0.0,
+    "min_radius": 0.0,
+    "max_radius": 0.0,
+    "isolated_area_min_width": 0.0,
+    "isolated_area_max_width": 0.0,
+    "isolated_area_shape": "Square"
+  },
+  "simulator": {
+    "dim_tassel": 0.1,
+    "num_maps": 1,
+    "repetitions": 1,
+    "cycle": 20160
+  }
+}

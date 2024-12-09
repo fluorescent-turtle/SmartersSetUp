@@ -6,6 +6,7 @@
      "speed": "0.62",
      "cut diameter": "0.24",
       "autonomy": "270",
+      "recharge": "60",
       "guide lines": 2,
       "shear load": 0
     },
@@ -13,6 +14,7 @@
      "id": "405X",
      "speed": "0.35",
      "cut diameter": "0.22",
+      "recharge": "60",
       "autonomy": "50",
       "guide lines": 1,
       "shear load": 0
@@ -21,6 +23,7 @@
      "id": "415X",
      "speed": "0.38",
      "cut diameter": "0.22",
+      "recharge": "60",
       "autonomy": "50",
       "guide lines": 1,
       "shear load": 0
@@ -29,6 +32,7 @@
      "id": "430X",
      "speed": "0.46",
      "cut diameter": "0.24",
+      "recharge": "50",
       "autonomy": "145",
       "guide lines": 2,
       "shear load": 0
