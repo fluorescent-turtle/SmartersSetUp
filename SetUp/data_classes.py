@@ -26,6 +26,7 @@ class RobotConfig:
     cutting_diameter: float
     autonomy: int
     guide_lines: int
+    recharge: int
     algo: str
 
 

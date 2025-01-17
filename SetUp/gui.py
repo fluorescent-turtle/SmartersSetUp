@@ -23,7 +23,6 @@ from tkinter import Tk, ttk
 from tkinter import simpledialog, filedialog, colorchooser
 from tkinter.ttk import Button
 
-import numpy as np
 from future.moves.tkinter import simpledialog, colorchooser
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -49,7 +48,7 @@ def resource_path(relative_path):
 
 def produce_json(data):
     data_config = {"robot": data[0], "env": data[2], "simulator": data[1]}
-    with open("data_file", "w") as data_file:
+    with open("data_file.json", "w") as data_file:
         json.dump(data_config, data_file, cls=ConfigEncoder, indent=2)
 
 
@@ -110,13 +109,13 @@ def add_circle():
 def draw_map():
     ax.clear()
     width, length = objects_data["width"], objects_data["length"]
-    tile_size = python_objects[1].dim_tassel
-    x_positions = np.arange(0, width, tile_size)
-    y_positions = np.arange(0, length, tile_size)
+    """tile_size = python_objects[1].dim_tassel
+    x_positions = np.arange(0, width, 1)
+    y_positions = np.arange(0, length, 1)
 
     for x in x_positions:
         for y in y_positions:
-            ax.add_patch(plt.Rectangle((x, y), tile_size, tile_size, fill=None, edgecolor='black'))
+            ax.add_patch(plt.Rectangle((x, y), tile_size, tile_size, fill=False, edgecolor='black'))"""
 
     ax.set_xlim(0, width)
     ax.set_ylim(0, length)
@@ -361,8 +360,8 @@ class RobotWindow(Tk):
         self.dialog_opened = False
         self.title("SetUpSmarters")
 
-        window_width = 600
-        window_height = 600
+        window_width = 700
+        window_height = 700
 
         # Get the screen dimensions and calculate center position
         screen_width, screen_height = (
@@ -409,9 +408,10 @@ class RobotWindow(Tk):
             ("Speed (m/h): ", tk.StringVar()),
             ("Cutting diameter: ", tk.StringVar()),
             ("Autonomy (minutes): ", tk.StringVar()),
+            ("Recharge time (minutes): ", tk.StringVar()),
         ]
 
-        self.speed, self.cutting_diameter, self.autonomy = [var for _, var in fields]
+        self.speed, self.cutting_diameter, self.autonomy, self.recharge = [var for _, var in fields]
 
         for i, (label_text, var) in enumerate(fields, start=4):
             ttk.Label(frame, text=label_text).grid(
@@ -423,11 +423,11 @@ class RobotWindow(Tk):
 
         # Divider
         divider = ttk.Separator(frame, orient="horizontal")
-        divider.grid(column=0, row=7, columnspan=2, sticky="ew", pady=(10, 0))
+        divider.grid(column=0, row=9, columnspan=2, sticky="ew", pady=(10, 0))
 
         # Add cutting mode dropdown menu
         ttk.Label(frame, text="Cutting mode - bounce mode: ").grid(
-            column=0, row=8, sticky="W", **options
+            column=0, row=10, sticky="W", **options
         )
         self.cutting_mode = tk.StringVar()
         self.cutting_mode.set("")
@@ -448,10 +448,10 @@ class RobotWindow(Tk):
             else None,
         )
         self.cutting_mode_entry.config(width=30, font=("Helvetica", 12))
-        self.cutting_mode_entry.grid(column=1, row=8, **options)
+        self.cutting_mode_entry.grid(column=1, row=10, **options)
 
         # Add Next button
-        Button(self, text="Next", command=self.click_next).place(x=450, y=500)
+        Button(self, text="Next", command=self.click_next).place(x=550, y=600)
 
         # Add padding to the frame and display it
         frame.grid(padx=20, pady=20)
@@ -522,6 +522,7 @@ class RobotWindow(Tk):
                 autonomy=int(self.autonomy.get()),
                 guide_lines=2,
                 algo=algo,
+                recharge=int(self.recharge.get()),
             )
         else:
             with open(resource_path("robots.json"), "r") as robots_file:
@@ -537,6 +538,7 @@ class RobotWindow(Tk):
                 cutting_diameter=float(robot_info["cut diameter"]),
                 autonomy=int(robot_info["autonomy"]),
                 guide_lines=2,
+                recharge=int(robot_info["recharge"]),
                 algo=algo,
             )
 
@@ -718,11 +720,12 @@ class EnvironmentWindow(Tk):
             isolated_area_shape=self.shape.get(),
         )
         python_objects.append(environment)
+        self.destroy()
 
         produce_json(python_objects)
-        run_second_program("../smarters/main.py")
+        #run_second_program("../smarters/main.py")
 
-        self.destroy()
+
 
 
 class SimulatorWindow(Tk):
