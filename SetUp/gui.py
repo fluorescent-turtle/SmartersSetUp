@@ -833,4 +833,3 @@ class SimulatorWindow(Tk):
             widget.destroy()
         self.destroy()
         ChooseWindow()
-
