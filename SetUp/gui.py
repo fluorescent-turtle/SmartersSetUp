@@ -1,4 +1,3 @@
-
 """ Copyright 2024 Sara Grecu
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -227,9 +226,9 @@ def update_area_coordinates_for_circle(x_center, y_center, radius, d_tassel, are
     """Update the coordinates for a circular area."""
     x_center, y_center = math.floor(x_center / d_tassel), math.floor(y_center / d_tassel)
     radius = round(radius / d_tassel)
-
-    for i in range(int(objects_data["length"] / d_tassel)):
-        for j in range(int(objects_data["width"] / d_tassel)):
+#ALEX 09/03/2025   BUG
+    for i in range(int(objects_data["width"] / d_tassel)):
+        for j in range(int(objects_data["length"] / d_tassel)):
             dist = math.hypot(i - x_center, j - y_center)
             if dist <= radius:
                 objects_data[area_type].append((i, j))
